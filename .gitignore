@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+# Datos privados: nunca a GitHub
+*.db
+.env
+.env.txt
+.secret_key
+static/img/subidas/

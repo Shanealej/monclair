@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block titulo %}Catálogo | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+{% from "_precio.html" import precio %}
+
+<!-- Portada -->
+<section class="portada">
+    <div class="contenedor portada-grid">
+        <div class="portada-texto">
+            <p class="sobrelinea">Decant / Fragrance · Managua</p>
+            <h1>Prueba el perfume <em>antes del frasco.</em></h1>
+            <p class="portada-descripcion">El mismo jugo, en 3, 5 o 10 ml. Si ya lo conoces, te llevas el grande.</p>
+            <div class="portada-botones">
+                <a class="boton boton-primario" href="#catalogo">Ver el catálogo {{ icono('flecha') }}</a>
+                {% if combos %}<a class="boton boton-fantasma" href="{{ url_for('ver_combos') }}">O un combo listo</a>{% endif %}
+            </div>
+            <p class="aviso-envio">Los precios no incluyen envío.</p>
+        </div>
+        <div class="portada-visual">
+            <img src="{{ url_for('static', filename='img/monclair_logo.jpeg') }}" alt="Monclair, decants y fragancias">
+        </div>
+    </div>
+</section>
+
+<!-- Franja -->
+<section class="franja-datos" aria-label="Datos de la tienda">
+    <div class="contenedor franja-datos-lista">
+        <span>3 · 5 · 10 ml</span><span>Originales</span><span>Pedís por WhatsApp</span><span>Salimos de Managua</span>
+    </div>
+</section>
+
+<!-- Catálogo -->
+<section id="catalogo" class="seccion contenedor">
+    <div class="seccion-cab">
+        <div><p class="sobrelinea">Los más pedidos</p><h2>Catálogo</h2></div>
+        <p class="contador">{{ productos|length }} {{ 'original' if productos|length == 1 else 'originales' }}</p>
+    </div>
+
+    <form class="buscador" action="{{ url_for('inicio') }}" method="get">
+        {{ icono('buscar') }}
+        <input type="search" name="buscar" placeholder="Busca un nombre, marca o aroma" value="{{ buscar }}" aria-label="Buscar perfume">
+        {% if genero %}<input type="hidden" name="genero" value="{{ genero }}">{% endif %}
+        {% if categoria %}<input type="hidden" name="categoria" value="{{ categoria }}">{% endif %}
+        <button class="boton boton-acento" type="submit">Buscar</button>
+    </form>
+
+    <nav class="segmentos" aria-label="Filtrar por género">
+        <a class="{{ 'activo' if not genero }}" href="{{ url_for('inicio', buscar=buscar or none, categoria=categoria or none, _anchor='catalogo') }}">Todos</a>
+        {% for valor, etiqueta in [('Hombre', 'Él'), ('Mujer', 'Ella'), ('Unisex', 'Unisex')] %}
+        <a class="{{ 'activo' if genero == valor }}" href="{{ url_for('inicio', genero=valor, buscar=buscar or none, categoria=categoria or none, _anchor='catalogo') }}">{{ etiqueta }}</a>
+        {% endfor %}
+    </nav>
+
+    <nav class="chips" aria-label="Filtrar por familia olfativa">
+        <a class="{{ 'activo' if not categoria }}" href="{{ url_for('inicio', buscar=buscar or none, genero=genero or none, _anchor='catalogo') }}">Todas las familias</a>
+        {% for opcion in ['Fresco', 'Dulce', 'Amaderado', 'Floral', 'Cítrico'] %}
+        <a class="{{ 'activo' if categoria == opcion }}" href="{{ url_for('inicio', categoria=opcion, buscar=buscar or none, genero=genero or none, _anchor='catalogo') }}">{{ opcion }}</a>
+        {% endfor %}
+    </nav>
+
+    <div class="productos">
+        {% for producto in productos %}
+        {% set agotado = producto.stock <= 0 %}
+        <article class="tarjeta {{ 'tarjeta-agotada' if agotado }}">
+            <a class="tarjeta-imagen" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Ver {{ producto.nombre }}">
+                <span class="pildora">{{ producto.genero }}</span>
+                {% if agotado %}<span class="sello sello-agotado">Agotado</span>
+                {% elif etiqueta_oferta(producto) %}<span class="sello sello-oferta">{{ etiqueta_oferta(producto) }}</span>{% endif %}
+                <img src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" alt="Imagen de {{ producto.nombre }}" loading="lazy">
+            </a>
+            <div class="tarjeta-info">
+                <p class="tarjeta-marca">{{ producto.marca }}</p>
+                <h3><a href="{{ url_for('pedido', producto_id=producto.id) }}">{{ producto.nombre }}</a></h3>
+                <p class="tarjeta-descripcion">{{ producto.descripcion }}</p>
+                <div class="tarjeta-pie">
+                    <div><small>Desde · 3 ml</small><strong>{{ precio(producto.precio_3, precio_final(producto, '3'), etiqueta_oferta(producto) if producto.stock > 0) }}</strong></div>
+                    <a class="boton-redondo" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Elegir {{ producto.nombre }}">{{ icono('mas') }}</a>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <div class="sin-resultados">
+            {% if hay_perfumes %}
+            <h3>No encontramos resultados</h3>
+            <p>Prueba con otro nombre o cambia los filtros.</p>
+            <a class="boton boton-primario" href="{{ url_for('inicio', _anchor='catalogo') }}">Ver todo el catálogo</a>
+            {% else %}
+            <h3>Pronto nuevos perfumes</h3>
+            <p>Estamos preparando el catálogo. Escríbenos y te contamos qué tenemos.</p>
+            <a class="boton boton-whatsapp" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% if combos %}
+<!-- Combos -->
+<section id="combos" class="seccion seccion-alt">
+    <div class="contenedor">
+        <div class="seccion-cab">
+            <div><p class="sobrelinea">Si no quieres elegir</p><h2>Combos listos</h2></div>
+            <a class="enlace-ver" href="{{ url_for('ver_combos') }}">Ver combos {{ icono('flecha') }}</a>
+        </div>
+        <div class="combos-grid">
+            {% for combo in combos %}
+            <article class="combo">
+                <div class="combo-imagen">
+                    <img src="{{ url_for('static', filename='img/' ~ combo.imagen) }}" alt="Imagen del combo {{ combo.nombre }}" loading="lazy">
+                    <span class="pildora">Combo</span>
+                    {% if etiqueta_oferta(combo) %}<span class="sello sello-oferta">{{ etiqueta_oferta(combo) }}</span>{% endif %}
+                {% if etiqueta_oferta(combo) %}<span class="sello sello-oferta">{{ etiqueta_oferta(combo) }}</span>{% endif %}
+                </div>
+                <div class="combo-info">
+                    <h3>{{ combo.nombre }}</h3>
+                    <p>{{ combo.descripcion }}</p>
+                    <div class="combo-pie">
+                        <strong>{{ precio(combo.precio, precio_combo(combo), etiqueta_oferta(combo)) }}</strong>
+                        <form method="post" action="{{ url_for('agregar_combo', combo_id=combo.id) }}"><button class="boton boton-primario" type="submit">Agregar al carrito</button></form>
+                    </div>
+                </div>
+            </article>
+            {% else %}
+            <p class="vacio-texto">Aún no hay combos disponibles.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Emprende -->
+<section class="banda">
+    <div class="contenedor banda-contenido">
+        <div><p class="sobrelinea">Crece con Monclair</p><h2>Paquetes de frascos completos para emprender.</h2></div>
+        <a class="boton boton-primario" href="{{ url_for('emprende') }}">Ver paquetes {{ icono('flecha') }}</a>
+    </div>
+</section>
+{% endblock %}

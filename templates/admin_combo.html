@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="contenedor admin">
+    <h1>{{ ('Nuevo ' if nuevo else 'Editar ') ~ titulo|lower }}</h1>
+    {% include "_admin_menu.html" %}
+    {% if errores %}<div class="errores">{% for e in errores %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+    <form class="admin-caja admin-form" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="token" value="{{ token }}">
+        <div class="admin-dos">
+            <label class="campo"><span>Nombre</span><input type="text" name="nombre" value="{{ v.nombre or '' }}" required maxlength="80"
+                placeholder="{{ 'Paquete inicial' if tipo == 'emprendedor' else 'Combo Verano' }}"></label>
+            <label class="campo"><span>Precio normal ({{ moneda }})</span><input type="text" inputmode="decimal" name="precio" required placeholder="0.00" value="{{ v.precio|numero }}"></label>
+            {% if tipo == 'emprendedor' %}
+            <label class="campo"><span>Cantidad de perfumes</span><input type="text" inputmode="numeric" name="cantidad" required value="{{ v.cantidad or '' }}" placeholder="3"></label>
+            {% endif %}
+        </div>
+        <label class="campo"><span>Descripción {{ '(qué perfumes trae)' if tipo == 'listo' else '(opcional)' }}</span><textarea name="descripcion" maxlength="300">{{ v.descripcion or '' }}</textarea></label>
+        {% set campos = [('oferta', 'Precio con descuento', 'precio')] %}
+        {% include "_descuento.html" %}
+        {% include "_foto.html" %}
+        <label class="admin-check"><input type="checkbox" name="activo" value="1" {{ 'checked' if v.activo }}> Mostrar en la tienda</label>
+        <button class="boton boton-acento" type="submit">Guardar</button>
+    </form>
+</section>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

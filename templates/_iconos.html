@@ -1,0 +1,15 @@
+{# Iconos SVG sencillos (sin JavaScript). Uso: {{ icono('carrito') }} #}
+{% macro icono(nombre) -%}
+<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+{%- if nombre == 'catalogo' %}<path d="M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z"/>
+{%- elif nombre == 'combos' %}<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 16.5l9 5 9-5"/>
+{%- elif nombre == 'emprende' %}<path d="M3 8h18v11H3z"/><path d="M9 8V5h6v3"/><path d="M3 13h18"/>
+{%- elif nombre == 'carrito' %}<path d="M3 4h2l2.4 11h10.2L20 8H6.2"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>
+{%- elif nombre == 'buscar' %}<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>
+{%- elif nombre == 'flecha' %}<path d="M7 17L17 7"/><path d="M8 7h9v9"/>
+{%- elif nombre == 'mas' %}<path d="M12 5v14"/><path d="M5 12h14"/>
+{%- elif nombre == 'volver' %}<path d="M15 5l-7 7 7 7"/>
+{%- elif nombre == 'check' %}<path d="M5 12.5l4.5 4.5L19 7.5"/>
+{%- endif %}
+</svg>
+{%- endmacro %}

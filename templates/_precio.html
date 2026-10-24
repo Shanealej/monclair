@@ -1,0 +1,4 @@
+{# Muestra el precio; si hay descuento, el anterior tachado y la etiqueta amarilla. #}
+{% macro precio(antes, ahora, etiqueta='') -%}
+<span class="precio-bloque">{% if etiqueta and antes != ahora %}<s class="precio-antes">{{ antes|dinero }}</s>{% endif %}<b>{{ ahora|dinero }}</b>{% if etiqueta %}<em class="etiqueta-oferta">{{ etiqueta }}</em>{% endif %}</span>
+{%- endmacro %}

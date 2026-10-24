@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido listo | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+<section class="cabecera-pagina cabecera-compacta">
+    <div class="contenedor">
+        <p class="sobrelinea">Casi listo</p>
+        <h1>Tu pedido está <em>listo</em></h1>
+        <p>Un paso más: envíalo por WhatsApp para confirmarlo contigo.</p>
+    </div>
+</section>
+<section class="seccion contenedor">
+    <div class="confirmacion">
+        <p class="sobrelinea">Resumen</p>
+        {% for linea in pedido.productos.split('\n') %}
+        {% set partes = linea.rsplit(' - ', 1) %}
+        <p class="linea-resumen"><span>{{ partes[0] }}</span><b>{{ partes[1] if partes|length > 1 }}</b></p>
+        {% endfor %}
+        <p class="linea-resumen"><span>Envío</span><b>{{ pedido.envio }}</b></p>
+        <div class="confirmacion-total">
+            <span>Total estimado</span>
+            <div><strong>{{ pedido.total }}</strong></div>
+        </div>
+        <p class="confirmacion-datos">Pago: {{ pedido.pago }}<br>Para {{ pedido.nombre }} · {{ pedido.ciudad }}{% if pedido.barrio %} · {{ pedido.barrio }}{% endif %} · {{ pedido.direccion }}</p>
+        <a class="boton boton-whatsapp boton-ancho" href="{{ enlace }}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp y enviar el pedido {{ icono('flecha') }}</a>
+        <p class="nota">Si no se abre WhatsApp, toca el botón otra vez. Tu carrito ya quedó vacío.</p>
+        <a class="enlace-centro" href="{{ url_for('inicio', _anchor='catalogo') }}">Seguir mirando el catálogo</a>
+    </div>
+</section>
+{% endblock %}

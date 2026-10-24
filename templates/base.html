@@ -1,0 +1,56 @@
+{% from "_iconos.html" import icono %}
+{% set ep = request.endpoint %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#05070a">
+    <meta name="description" content="Monclair Decants y Perfumes: decants originales en 3, 5 y 10 ml. Prueba el perfume antes del frasco.">
+    <title>{% block titulo %}{{ negocio }}{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Encabezado -->
+    <header class="encabezado">
+        <div class="contenedor barra">
+            <a class="marca" href="{{ url_for('inicio') }}" aria-label="{{ negocio }}, inicio">
+                <span class="marca-logo"><img src="{{ url_for('static', filename='img/monclair_logo.jpeg') }}" alt=""></span>
+                <span class="marca-texto">MONCLAIR <small>DECANTS Y PERFUMES</small></span>
+            </a>
+            <nav class="navegacion" aria-label="Navegación principal">
+                <a class="{{ 'activo' if ep == 'inicio' }}" href="{{ url_for('inicio', _anchor='catalogo') }}">Catálogo</a>
+                <a class="{{ 'activo' if ep == 'ver_combos' }}" href="{{ url_for('ver_combos') }}">Combos</a>
+                <a class="{{ 'activo' if ep == 'emprende' }}" href="{{ url_for('emprende') }}">Emprende</a>
+            </nav>
+            <div class="acciones-barra">
+                <a class="chip-carrito {{ 'activo' if ep == 'ver_carrito' }}" href="{{ url_for('ver_carrito') }}" aria-label="Carrito, {{ cantidad_carrito }} artículos">
+                    {{ icono('carrito') }}<span>Carrito</span>{% if cantidad_carrito %}<b>{{ cantidad_carrito }}</b>{% endif %}
+                </a>
+                <a class="chip-chat" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">Chat ↗</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <!-- Menú móvil -->
+    <nav class="nav-inferior" aria-label="Navegación móvil">
+        <a class="{{ 'activo' if ep in ('inicio', 'pedido') }}" href="{{ url_for('inicio') }}">{{ icono('catalogo') }}<small>Catálogo</small></a>
+        <a class="{{ 'activo' if ep == 'ver_combos' }}" href="{{ url_for('ver_combos') }}">{{ icono('combos') }}<small>Combos</small></a>
+        <a class="{{ 'activo' if ep in ('emprende',) }}" href="{{ url_for('emprende') }}">{{ icono('emprende') }}<small>Emprende</small></a>
+        <a class="{{ 'activo' if ep in ('ver_carrito', 'pedido_listo') }}" href="{{ url_for('ver_carrito') }}"><span class="nav-icono">{{ icono('carrito') }}{% if cantidad_carrito %}<b>{{ cantidad_carrito }}</b>{% endif %}</span><small>Carrito</small></a>
+    </nav>
+
+    <footer class="pie">
+        <div class="contenedor pie-interior">
+            <p>MONCLAIR DECANTS Y PERFUMES</p>
+            <span>Encuentra una fragancia que hable por ti.</span>
+            <small>Managua, Nicaragua</small>
+        </div>
+    </footer>
+</body>
+</html>

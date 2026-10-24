@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Historial | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="contenedor admin">
+    <h1>Historial de pedidos</h1>
+    {% include "_admin_menu.html" %}
+    <form class="admin-caja admin-dos" method="get">
+        <label class="campo"><span>Desde</span><input type="date" name="desde" value="{{ desde }}"></label>
+        <label class="campo"><span>Hasta</span><input type="date" name="hasta" value="{{ hasta }}"></label>
+        <button class="boton boton-fantasma" type="submit">Filtrar</button>
+        <a class="boton boton-acento" href="{{ url_for('admin_historial_pdf', desde=desde or none, hasta=hasta or none) }}">Descargar PDF</a>
+    </form>
+    <div class="admin-caja admin-scroll">
+        <table class="admin-tabla">
+            <tr><th>N.º</th><th>Fecha</th><th>Cliente</th><th>Entrega</th><th>Productos</th><th>Total</th></tr>
+            {% for p in pedidos %}
+            <tr><td>{{ p.id }}</td><td>{{ p.fecha }}</td><td>{{ p.nombre }}
+{{ p.telefono }}</td><td>{{ p.ciudad }} {{ p.barrio }}
+{{ p.direccion }}</td><td>{{ p.productos }}</td><td>{{ p.total }}</td></tr>
+            {% else %}<tr><td colspan="6">No hay pedidos en esas fechas.</td></tr>{% endfor %}
+        </table>
+    </div>
+</section>
+{% endblock %}

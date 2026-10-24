@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Algo salió mal | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="seccion contenedor">
+    <div class="vacio">
+        <h2>{{ 'La página expiró' if codigo == 400 else 'Algo salió mal' }}</h2>
+        <p>{{ 'Vuelve atrás, recarga la página e inténtalo otra vez.' if codigo == 400 else 'Inténtalo de nuevo en un momento.' }}</p>
+        <div class="vacio-botones"><a class="boton boton-primario" href="{{ url_for('inicio') }}">Volver al inicio</a></div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{# Descuento: campos = [(nombre del campo, texto, campo del precio normal)] #}
+<fieldset class="admin-oferta" data-oferta>
+    <legend>Descuento (opcional)</legend>
+    <div class="admin-dos">
+        <label class="campo"><span>Porcentaje de descuento</span><input type="text" inputmode="numeric" name="descuento" placeholder="Ej. 20" value="{{ v.descuento or '' }}" data-porcentaje></label>
+        <label class="campo"><span>Etiqueta en la tienda</span><select name="etiqueta">
+            {% for e in etiquetas %}<option value="{{ e }}" {{ 'selected' if v.etiqueta == e }}>{{ 'Porcentaje (ej. 20% OFF)' if e == '% OFF' else e }}</option>{% endfor %}</select></label>
+    </div>
+    <div class="{{ 'admin-precios-oferta' if campos|length > 1 else 'admin-dos' }}">
+        {% for campo, texto, de in campos %}
+        <label class="campo"><span>{{ texto }}</span>
+            <input type="text" inputmode="decimal" name="{{ campo }}" value="{{ v[campo]|numero }}" data-oferta-de="{{ de }}"></label>
+        {% endfor %}
+    </div>
+    <small class="admin-ayuda">El precio de arriba es el precio normal (el que sale tachado). Escribe el porcentaje y el precio con descuento se calcula solo, o escribe el precio con descuento y se calcula el porcentaje. Deja todo vacío si no hay oferta.</small>
+</fieldset>

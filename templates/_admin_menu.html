@@ -1,0 +1,7 @@
+{% with mensajes = get_flashed_messages() %}{% for m in mensajes %}<div class="admin-aviso">{{ m }}</div>{% endfor %}{% endwith %}
+<nav class="admin-menu">
+    <a class="boton boton-fantasma boton-chico" href="{{ url_for('admin_panel') }}">Catálogo y envíos</a>
+    <a class="boton boton-fantasma boton-chico" href="{{ url_for('admin_inventario') }}">Inventario</a>
+    <a class="boton boton-fantasma boton-chico" href="{{ url_for('admin_historial') }}">Historial de pedidos</a>
+    <form method="post" action="{{ url_for('admin_salir') }}"><input type="hidden" name="token" value="{{ token }}"><button class="boton boton-fantasma boton-chico" type="submit">Salir</button></form>
+</nav>

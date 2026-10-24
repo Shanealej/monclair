@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Administración | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="contenedor admin">
+    <form class="admin-caja admin-form admin-login" method="post">
+        <h1>Administración</h1>
+        {% if error %}<div class="errores"><p>{{ error }}</p></div>{% endif %}
+        <label class="campo"><span>Usuario</span><input type="text" name="usuario" autocomplete="username" required></label>
+        <label class="campo"><span>Contraseña</span><input type="password" name="clave" autocomplete="current-password" required></label>
+        <button class="boton boton-acento boton-ancho" type="submit">Entrar</button>
+    </form>
+</section>
+{% endblock %}

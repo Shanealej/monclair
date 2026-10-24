@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Combos listos | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+{% from "_precio.html" import precio %}
+<section class="cabecera-pagina">
+    <div class="contenedor">
+        <p class="sobrelinea">Si no quieres elegir</p>
+        <h1>Combos <em>listos</em></h1>
+        <p>Selecciones preparadas para descubrir fragancias en diferentes momentos.</p>
+    </div>
+</section>
+<section class="seccion contenedor">
+    <div class="combos-grid">
+        {% for combo in combos %}
+        <article class="combo">
+            <div class="combo-imagen">
+                <img src="{{ url_for('static', filename='img/' ~ combo.imagen) }}" alt="Imagen del combo {{ combo.nombre }}" loading="lazy">
+                <span class="pildora">Combo</span>
+                {% if etiqueta_oferta(combo) %}<span class="sello sello-oferta">{{ etiqueta_oferta(combo) }}</span>{% endif %}
+            </div>
+            <div class="combo-info">
+                <h3>{{ combo.nombre }}</h3>
+                <p>{{ combo.descripcion }}</p>
+                <div class="combo-pie">
+                    <strong>{{ precio(combo.precio, precio_combo(combo), etiqueta_oferta(combo)) }}</strong>
+                    <form method="post" action="{{ url_for('agregar_combo', combo_id=combo.id) }}"><button class="boton boton-primario" type="submit">Agregar al carrito</button></form>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <p class="vacio-texto">Aún no hay combos disponibles.</p>
+        {% endfor %}
+    </div>
+    <p class="nota">Los precios no incluyen envío. Confirmamos disponibilidad al recibir tu pedido.</p>
+</section>
+{% endblock %}

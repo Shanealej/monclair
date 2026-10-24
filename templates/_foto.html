@@ -1,0 +1,11 @@
+{# Zona para subir la foto: se puede tocar o arrastrar el archivo encima. #}
+<div class="campo">
+    <span>Subir fotografía</span>
+    <label class="subir-foto" data-subir-foto>
+        <input type="file" name="foto" accept="image/jpeg,image/png,image/webp">
+        <img class="subir-vista" src="{{ url_for('static', filename='img/' ~ (v.imagen or 'monclair_logo.jpeg')) }}" alt="" {{ 'hidden' if not v.imagen or v.imagen == 'monclair_logo.jpeg' }}>
+        <svg class="subir-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.25 4.25 0 0 1-.5 9.5H7z" fill="currentColor"/><path d="M12 15.5v-6m0 0-2.5 2.5M12 9.5l2.5 2.5" stroke="#05070a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <strong class="subir-titulo">Sube una foto</strong>
+        <small class="subir-texto">Arrastra la foto aquí o toca para elegirla · JPG, PNG o WebP</small>
+    </label>
+</div>

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}Panel | {{ negocio }}{% endblock %}
+{% macro lista(items, vacio, tabla) %}
+<div class="admin-lista">
+{% for p in items %}
+    <div class="admin-item {{ '' if p.activo else 'admin-oculto' }}">
+        <img src="{{ url_for('static', filename='img/' ~ p.imagen) }}" alt="">
+        <div><strong>{% if p.marca %}{{ p.marca }} · {% endif %}{{ p.nombre }}</strong>{% if not p.activo %} (oculto){% endif %}
+            <p>{% if tabla == 'productos' %}3 ml {{ precio_final(p, '3')|dinero }} · 5 ml {{ precio_final(p, '5')|dinero }} · 10 ml {{ precio_final(p, '10')|dinero }} · Frasco {{ precio_final(p, 'frasco')|dinero }}<br>
+               <span class="admin-stock {{ 'agotado' if p.stock <= 0 else ('pocas' if p.stock <= pocas else '') }}">{{ 'Agotado' if p.stock <= 0 else p.stock ~ ' unidad(es)' }}</span>
+               {% if etiqueta_oferta(p) %}<span class="admin-oferta-pill">{{ etiqueta_oferta(p) }}</span>{% endif %}
+               {% else %}{{ precio_combo(p)|dinero }}{% if p.oferta %} <s>{{ p.precio|dinero }}</s>{% endif %}{% if p.tipo == 'emprendedor' %} · {{ p.cantidad }} perfumes{% endif %}
+               {% if etiqueta_oferta(p) %}<br><span class="admin-oferta-pill">{{ etiqueta_oferta(p) }}</span>{% endif %}{% endif %}</p></div>
+        <div class="acciones">
+            <a class="boton boton-fantasma boton-chico" href="{{ url_for('admin_perfume', producto_id=p.id) if tabla == 'productos' else url_for('admin_combo', combo_id=p.id) }}">Editar</a>
+            <form method="post" action="{{ url_for('admin_eliminar', tabla=tabla, registro_id=p.id) }}"><input type="hidden" name="token" value="{{ token }}">
+                <button class="boton boton-fantasma boton-chico" type="submit" data-confirmar="¿Eliminar {{ p.nombre }}?">Eliminar</button></form>
+        </div>
+    </div>
+{% else %}<p class="nota nota-izq">{{ vacio }}</p>{% endfor %}
+</div>
+{% endmacro %}
+{% block contenido %}
+<section class="contenedor admin">
+    <h1>Panel de administración</h1>
+    {% include "_admin_menu.html" %}
+
+    <div class="admin-caja">
+        <div class="admin-cab"><h2>Perfumes ({{ productos|length }})</h2><a class="boton boton-acento boton-chico" href="{{ url_for('admin_perfume') }}">+ Subir perfume</a></div>
+        {{ lista(productos, 'Todavía no hay perfumes. Sube el primero.', 'productos') }}
+    </div>
+
+    <div id="combos" class="admin-caja">
+        <div class="admin-cab"><h2>Combos ({{ combos|length }})</h2><a class="boton boton-acento boton-chico" href="{{ url_for('admin_combo', tipo='listo') }}">+ Nuevo combo</a></div>
+        {{ lista(combos, 'Todavía no hay combos.', 'combos') }}
+    </div>
+
+    <div class="admin-caja">
+        <div class="admin-cab"><h2>Paquetes emprendedor ({{ paquetes|length }})</h2><a class="boton boton-acento boton-chico" href="{{ url_for('admin_combo', tipo='emprendedor') }}">+ Nuevo paquete</a></div>
+        {{ lista(paquetes, 'Todavía no hay paquetes.', 'combos') }}
+    </div>
+
+    <form id="envios" class="admin-caja admin-form" method="post" action="{{ url_for('admin_envios') }}">
+        <input type="hidden" name="token" value="{{ token }}">
+        <h2>Precios de envío ({{ moneda }})</h2>
+        <p class="nota nota-izq">Deja vacío para "por confirmar". Pedidos mayores a {{ envio_gratis|dinero }} tienen envío gratis.</p>
+        <div class="admin-zonas">
+            <div class="admin-zona"><strong>{{ transporte_zona }}</strong>
+                <input type="text" inputmode="decimal" name="precio_{{ transporte_zona }}" value="{{ transporte|numero }}"><span></span></div>
+            {% for zona, precio in barrios.items() %}
+            <div class="admin-zona"><span>{{ zona }}</span>
+                <input type="text" inputmode="decimal" name="precio_{{ zona }}" value="{{ precio|numero }}">
+                <label class="admin-check"><input type="checkbox" name="borrar_{{ zona }}" value="1"> Quitar</label></div>
+            {% endfor %}
+            <div class="admin-zona"><input type="text" name="nueva_zona" placeholder="Nuevo barrio" maxlength="60">
+                <input type="text" inputmode="decimal" name="nuevo_precio" placeholder="Precio"><span></span></div>
+        </div>
+        <button class="boton boton-acento" type="submit">Guardar envíos</button>
+    </form>
+</section>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

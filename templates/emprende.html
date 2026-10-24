@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}Emprende con nosotros | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+{% from "_precio.html" import precio %}
+<section class="cabecera-pagina">
+    <div class="contenedor">
+        <p class="sobrelinea">Una oportunidad para crecer</p>
+        <h1>Emprende con <em>Monclair</em></h1>
+        <p>Paquetes de frascos completos para empezar tu propio catálogo.</p>
+    </div>
+</section>
+
+<section class="seccion contenedor">
+    <div class="paquetes">
+        {% for paquete in paquetes %}
+        <article class="paquete">
+            {% if etiqueta_oferta(paquete) %}<span class="sello sello-oferta sello-paquete">{{ etiqueta_oferta(paquete) }}</span>{% endif %}
+            <p class="paquete-nombre">{{ paquete.nombre }}</p>
+            <div class="paquete-cantidad"><strong>{{ paquete.cantidad }}</strong><span>perfumes</span></div>
+            <p class="paquete-precio">{{ precio(paquete.precio, precio_combo(paquete), etiqueta_oferta(paquete)) }}</p>
+            {% if paquete.descripcion %}<p class="paquete-detalle">{{ paquete.descripcion }}</p>{% endif %}
+            <p class="paquete-detalle">{{ (precio_combo(paquete) / paquete.cantidad)|dinero }} por perfume · frascos completos</p>
+            <form method="post" action="{{ url_for('agregar_combo', combo_id=paquete.id) }}">
+                <button class="boton boton-primario boton-ancho" type="submit">Agregar al carrito</button>
+            </form>
+        </article>
+        {% else %}
+        <p class="vacio-texto">Pronto publicaremos nuevos paquetes. Escríbenos por WhatsApp.</p>
+        {% endfor %}
+    </div>
+    <p class="nota">Precios en dólares. No incluyen envío. Confirmamos existencias y los perfumes disponibles al recibir tu pedido.</p>
+</section>
+
+<section class="seccion seccion-alt">
+    <div class="contenedor emprende-pasos">
+        <div class="emprende-texto">
+            <p class="sobrelinea">¿Cómo funciona?</p>
+            <h2>Empieza a tu ritmo.</h2>
+            <p>Elige el paquete, haz tu pedido con tus datos y lo coordinamos por WhatsApp. ¿Quieres otra cantidad? Escríbenos.</p>
+            <a class="boton boton-fantasma" href="https://wa.me/{{ whatsapp }}?text=Hola%2C%20quiero%20informaci%C3%B3n%20para%20emprender%20con%20Monclair%20Decants%20y%20Perfumes" target="_blank" rel="noopener">Escribir por WhatsApp {{ icono('flecha') }}</a>
+        </div>
+        <ol class="pasos">
+            <li><span>01</span><div><h3>Elige tu paquete</h3><p>Frascos completos, al por mayor.</p></div></li>
+            <li><span>02</span><div><h3>Haz tu pedido</h3><p>Agrégalo al carrito y completa tus datos de entrega.</p></div></li>
+            <li><span>03</span><div><h3>Confirma por WhatsApp</h3><p>Coordinamos pago, perfumes disponibles y envío.</p></div></li>
+        </ol>
+    </div>
+</section>
+{% endblock %}

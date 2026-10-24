@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block titulo %}Carrito | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+<section class="cabecera-pagina cabecera-compacta">
+    <div class="contenedor">
+        <p class="sobrelinea">Tu pedido</p>
+        <h1>Tu <em>carrito</em></h1>
+    </div>
+</section>
+<section class="seccion contenedor">
+{% if carrito %}
+<div class="carrito-layout">
+    <div class="carrito-lista">
+        {% for item in carrito %}
+        <article class="item">
+            <div class="item-mini">M</div>
+            <div class="item-datos"><p>{{ item.marca }}</p><h2>{{ item.nombre }}</h2><span>{{ item.tamano }} · Cantidad: {{ item.cantidad }}</span></div>
+            <strong class="item-precio">{{ (item.precio * item.cantidad)|dinero }}</strong>
+            <form method="post" action="{{ url_for('eliminar_carrito', clave=item.clave) }}"><button class="item-quitar" type="submit" aria-label="Quitar {{ item.nombre }}">×</button></form>
+        </article>
+        {% endfor %}
+        <p class="nota nota-izq">El envío se suma al elegir tu ciudad. Salimos de Managua: en la ciudad, 24 a 48 horas; al resto del país, por encomienda.</p>
+    </div>
+
+    <!-- Datos del cliente -->
+    <form class="panel-pedido" method="post" action="{{ url_for('enviar_pedido') }}">
+        <div class="panel-resumen">
+            <div class="fila"><span>Subtotal</span><b>{{ resumen.subtotal|dinero }}</b></div>
+            <div class="fila"><span id="envio-tipo">{{ resumen.envio.tipo }}</span><b id="envio-valor" class="envio-{{ resumen.envio.estado }}">{{ resumen.envio.texto }}</b></div>
+            <p class="envio-aviso" id="envio-aviso">
+                {% if resumen.envio.estado == 'gratis' %}Tu pedido supera {{ envio_gratis_desde|dinero }}: el envío es gratis.
+                {% else %}Envío gratis en pedidos mayores a {{ envio_gratis_desde|dinero }}. Agrega {{ resumen.faltante|dinero }} más y es gratis.{% endif %}
+            </p>
+            <div class="fila fila-total"><span>Vas a pedir</span><div id="total-valor"><strong>{{ resumen.total|dinero }}</strong>{% if resumen.envio.estado == 'confirmar' %}<small>+ envío por confirmar</small>{% endif %}</div></div>
+        </div>
+
+        {% if errores %}
+        <div class="errores" role="alert">{% for error in errores %}<p>{{ error }}</p>{% endfor %}</div>
+        {% endif %}
+
+        <label class="campo"><span>¿A nombre de quién?</span>
+            <input type="text" name="nombre" value="{{ datos.get('nombre', '') }}" placeholder="Tu nombre" autocomplete="name" required minlength="2" maxlength="80"></label>
+        <label class="campo"><span>¿Tu WhatsApp?</span>
+            <input type="tel" name="telefono" value="{{ datos.get('telefono', '') }}" placeholder="Ej. 8888 8888" autocomplete="tel" inputmode="tel" required maxlength="25"></label>
+        <label class="campo"><span>¿En qué ciudad?</span>
+            <select name="ciudad" required>
+                <option value="" disabled {% if not datos.get('ciudad') %}selected{% endif %}>Elige tu ciudad</option>
+                {% for ciudad in ciudades %}<option value="{{ ciudad }}" {% if datos.get('ciudad') == ciudad %}selected{% endif %}>{{ ciudad }}</option>{% endfor %}
+            </select></label>
+        <label class="campo" id="campo-barrio"><span>Barrio de Managua</span>
+            <select name="barrio">
+                <option value="" {% if not datos.get('barrio') %}selected{% endif %}>Elige tu barrio</option>
+                {% for barrio in barrios %}<option value="{{ barrio }}" {% if datos.get('barrio') == barrio %}selected{% endif %}>{{ barrio }}</option>{% endfor %}
+            </select></label>
+        <label class="campo"><span>Dirección y referencia</span>
+            <input type="text" name="direccion" value="{{ datos.get('direccion', '') }}" placeholder="Calle, casa y una referencia" autocomplete="street-address" required minlength="5" maxlength="250"></label>
+
+        <fieldset class="pagos">
+            <legend>¿Cómo quieres pagar?</legend>
+            {% for clave, (titulo, detalle) in formas_pago.items() %}
+            <label class="pago"><input type="radio" name="pago" value="{{ clave }}" {% if datos.get('pago') == clave %}checked{% endif %} required><span><b>{{ titulo }}</b><small>{{ detalle }}</small></span></label>
+            {% endfor %}
+        </fieldset>
+
+        <button class="boton boton-whatsapp boton-ancho" type="submit">Pedir por WhatsApp {{ icono('flecha') }}</button>
+        <small class="panel-nota">Se abre WhatsApp con el pedido escrito. Sin crear cuenta. Confirmaremos existencias y precio final.</small>
+    </form>
+</div>
+{% else %}
+    {% if errores %}<div class="errores" role="alert">{% for error in errores %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+    <div class="vacio">
+        <div class="vacio-icono">{{ icono('carrito') }}</div>
+        <h2>Tu carrito está vacío</h2>
+        <p>Explora el catálogo y agrega tus presentaciones favoritas.</p>
+        <div class="vacio-botones">
+            <a class="boton boton-primario" href="{{ url_for('inicio', _anchor='catalogo') }}">Ir al catálogo</a>
+            <a class="boton boton-fantasma" href="{{ url_for('ver_combos') }}">Ver combos</a>
+        </div>
+    </div>
+{% endif %}
+</section>
+{% if carrito %}
+<script type="application/json" id="config-envio">{{ config_envio|tojson }}</script>
+<script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+{% endif %}
+{% endblock %}

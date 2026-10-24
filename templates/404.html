@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Página no encontrada | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="seccion contenedor">
+    <div class="vacio">
+        <p class="sobrelinea">Error 404</p>
+        <h2>Esta página no está disponible.</h2>
+        <p>Puede que el enlace haya cambiado o que el producto ya no exista.</p>
+        <div class="vacio-botones"><a class="boton boton-primario" href="{{ url_for('inicio') }}">Volver al inicio</a></div>
+    </div>
+</section>
+{% endblock %}

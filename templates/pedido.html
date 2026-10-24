@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}{{ producto.nombre }} | {{ negocio }}{% endblock %}
+{% block contenido %}
+{% from "_iconos.html" import icono %}
+<section class="contenedor detalle-pagina">
+    <a class="volver" href="{{ url_for('inicio', _anchor='catalogo') }}">{{ icono('volver') }} Volver al catálogo</a>
+    <div class="detalle">
+        <div class="detalle-foto">
+            <img src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" alt="Perfume {{ producto.nombre }}">
+        </div>
+        <div class="detalle-info">
+            {% set agotado = producto.stock <= 0 %}
+            {% if agotado %}<p class="sello sello-agotado sello-detalle">Agotado</p>
+            {% elif etiqueta_oferta(producto) %}<p class="sello sello-oferta sello-detalle">{{ etiqueta_oferta(producto) }}</p>{% endif %}
+            <div class="etiquetas"><span>{{ producto.genero }}</span><span>Diseñador</span><span>{{ producto.categoria }}</span></div>
+            <p class="sobrelinea">{{ producto.marca }}</p>
+            <h1>{{ producto.nombre }}</h1>
+            <p class="detalle-descripcion">{{ producto.descripcion }}</p>
+
+            <form method="post" class="selector">
+                <fieldset>
+                    <legend>¿De cuánto lo quieres?</legend>
+                    <div class="tamanos">
+                        {% for valor, nombre in [('3', '3 ml'), ('5', '5 ml'), ('10', '10 ml'), ('frasco', 'Frasco completo')] %}
+                        {% set antes = producto['precio_' ~ valor] %}
+                        <label class="tamano {{ 'tamano-frasco' if valor == 'frasco' }}"><input type="radio" name="tamano" value="{{ valor }}" {{ 'checked' if loop.first }} {{ 'disabled' if agotado }}>
+                            <span>{% if valor == 'frasco' %}<em><small>{{ nombre }}</small><i>Precio estimado</i></em>{% else %}<small>{{ nombre }}</small>{% endif %}
+                                <strong>{% if producto['oferta_' ~ valor] %}<s class="precio-antes">{{ antes|dinero }}</s> {% endif %}{{ precio_final(producto, valor)|dinero }}</strong></span></label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+                {% if agotado %}
+                <button class="boton boton-primario boton-ancho" type="button" disabled>Agotado</button>
+                <a class="boton boton-whatsapp boton-ancho" href="https://wa.me/{{ whatsapp }}?text={{ ('Hola, avísenme cuando vuelva ' ~ producto.marca ~ ' ' ~ producto.nombre)|urlencode }}" target="_blank" rel="noopener">Avísame cuando llegue</a>
+                {% else %}
+                <button class="boton boton-primario boton-ancho" type="submit">Agregar al carrito {{ icono('mas') }}</button>
+                {% endif %}
+                <p class="nota nota-izq">Los precios no incluyen envío. Confirmamos disponibilidad antes de cerrar tu pedido.</p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

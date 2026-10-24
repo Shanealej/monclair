@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Inventario | {{ negocio }}{% endblock %}
+{% block contenido %}
+<section class="contenedor admin">
+    <h1>Inventario</h1>
+    <p class="nota nota-izq">Aquí ves cuántas unidades te quedan de cada perfume. Cuando llegue mercadería, súmala. Cuando vendas o saques una, réstala.</p>
+    {% include "_admin_menu.html" %}
+
+    <div class="inv-lista">
+    {% for p in productos %}
+        {% set estado = 'agotado' if p.stock <= 0 else ('pocas' if p.stock <= pocas else 'ok') %}
+        <form class="inv-tarjeta" method="post">
+            <input type="hidden" name="token" value="{{ token }}">
+            <input type="hidden" name="producto_id" value="{{ p.id }}">
+            <div class="inv-cab">
+                <div><strong>{{ p.nombre }}</strong><small>{{ p.marca }}</small></div>
+                <div class="inv-numero inv-{{ estado }}"><b>{{ p.stock }}</b><small>{{ 'Agotado' if estado == 'agotado' else ('Quedan pocas' if estado == 'pocas' else 'unidades') }}</small></div>
+            </div>
+            <div class="inv-acciones">
+                <input type="text" inputmode="numeric" name="cantidad" value="1" aria-label="Cantidad" required>
+                <button class="boton boton-acento boton-chico" type="submit" name="accion" value="sumar">+ Llegaron</button>
+                <button class="boton boton-fantasma boton-chico" type="submit" name="accion" value="restar">− Se vendieron</button>
+            </div>
+            <input class="inv-nota" type="text" name="nota" maxlength="120" placeholder="Nota opcional (ej. venta a Ana)">
+        </form>
+    {% else %}
+        <p class="nota nota-izq">Todavía no hay perfumes. Súbelos desde "Catálogo y envíos".</p>
+    {% endfor %}
+    </div>
+
+    <details class="admin-caja inv-historial">
+        <summary>Ver historial de cambios ({{ movimientos|length }})</summary>
+        <ul>
+        {% for m in movimientos %}
+            <li class="mov-{{ m.tipo|lower }}"><b>{{ '+' if m.tipo == 'Entrada' else '−' }}{{ m.cantidad }}</b>
+                {{ 'Llegaron' if m.tipo == 'Entrada' else 'Salieron' }} {{ m.cantidad }} de {{ m.producto }}. Quedaron {{ m.existencia }}.
+                <small>{{ m.fecha }}{% if m.nota %} · {{ m.nota }}{% endif %}</small></li>
+        {% else %}<li>Todavía no hay cambios.</li>{% endfor %}
+        </ul>
+    </details>
+</section>
+{% endblock %}
