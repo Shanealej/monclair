@@ -294,8 +294,7 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
     .chip-carrito { display: none; }
     .seccion { padding-top: 30px; padding-bottom: 30px; }
     .portada-grid { grid-template-columns: 1fr; padding: 28px 0 24px; }
-    .portada-visual { position: absolute; top: 18px; right: -60px; width: 230px; opacity: .35; pointer-events: none; }
-    .portada-texto { position: relative; }
+    .portada-visual { display: none; }  /* en celular el logo ya está en el encabezado */
     .portada-botones .boton { flex: 1; }
     .franja-datos-lista { justify-content: flex-start; font-size: 10px; }
     .buscador .boton { display: none; }
