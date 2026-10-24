@@ -44,4 +44,13 @@
         </div>
     </div>
 </section>
+
+{% if recomendados %}
+<section class="contenedor recomendaciones">
+    <div class="seccion-cab"><div><p class="sobrelinea">Arma tu colección</p><h2>También te puede gustar</h2></div></div>
+    <div class="productos productos-recomendados">
+        {% for producto in recomendados %}{% include "_tarjeta.html" %}{% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

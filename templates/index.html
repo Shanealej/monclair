@@ -59,26 +59,7 @@
 
     <div class="productos">
         {% for producto in productos %}
-        {% set desde = primer_tamano(producto) %}
-        {% set agotado = not desde %}
-        <article class="tarjeta {{ 'tarjeta-agotada' if agotado }}">
-            <a class="tarjeta-imagen" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Ver {{ producto.nombre }}">
-                <span class="pildora">{{ producto.genero }}</span>
-                {% if agotado %}<span class="sello sello-agotado">Agotado</span>
-                {% elif etiqueta_oferta(producto) %}<span class="sello sello-oferta">{{ etiqueta_oferta(producto) }}</span>{% endif %}
-                <img src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" alt="Imagen de {{ producto.nombre }}" loading="lazy">
-            </a>
-            <div class="tarjeta-info">
-                <p class="tarjeta-marca">{{ producto.marca }}</p>
-                <h3><a href="{{ url_for('pedido', producto_id=producto.id) }}">{{ producto.nombre }}</a></h3>
-                <p class="tarjeta-descripcion">{{ producto.descripcion }}</p>
-                <div class="tarjeta-pie">
-                    {% if desde %}<div><small>Desde · {{ {'3': '3 ml', '5': '5 ml', '10': '10 ml', 'frasco': 'Frasco'}[desde] }}</small><strong>{{ precio(producto['precio_' ~ desde], precio_final(producto, desde), etiqueta_oferta(producto)) }}</strong></div>
-                    {% else %}<div><small>Por ahora</small><strong>Agotado</strong></div>{% endif %}
-                    <a class="boton-redondo" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Elegir {{ producto.nombre }}">{{ icono('mas') }}</a>
-                </div>
-            </div>
-        </article>
+        {% include "_tarjeta.html" %}
         {% else %}
         <div class="sin-resultados">
             {% if hay_perfumes %}

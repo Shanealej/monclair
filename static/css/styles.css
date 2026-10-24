@@ -491,3 +491,8 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .portada-clientes b { display: block; font-size: 20px; line-height: 1.1; }
 .portada-clientes small { color: var(--texto-suave); font-size: 12px; }
 @media (min-width: 701px) { .portada-clientes { position: absolute; right: 0; bottom: 44px; margin: 0; } }
+
+/* Recomendaciones en la página del perfume */
+.recomendaciones { padding-top: 56px; padding-bottom: 24px; border-top: 1px solid var(--linea); margin-top: 48px; }
+.productos-recomendados { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .productos-recomendados { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

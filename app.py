@@ -386,7 +386,11 @@ def pedido(producto_id):
             return redirect(url_for("pedido", producto_id=producto_id))
         return agregar_al_carrito({"clave": f"{producto_id}-{tamano}", "nombre": producto["nombre"], "marca": producto["marca"],
                                    "tamano": TAMANOS[tamano], "precio": float(precio_final(producto, tamano))})
-    return render_template("pedido.html", producto=producto)
+    # Recomendaciones: primero los de la misma familia y género, solo con unidades
+    recomendados = consultar("""SELECT * FROM productos WHERE activo = 1 AND stock > 0 AND id != ?
+                                ORDER BY (categoria = ?) + (genero = ?) DESC, RANDOM() LIMIT 4""",
+                             (producto_id, producto["categoria"], producto["genero"]))
+    return render_template("pedido.html", producto=producto, recomendados=recomendados)
 
 
 def carrito_disponible():
