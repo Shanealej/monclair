@@ -1,4 +1,4 @@
-"""Monclair Decants y Perfumes: tienda en Flask + SQLite con pedidos por WhatsApp y panel de administración."""
+"""Montclair Decants y Perfumes: tienda en Flask + SQLite con pedidos por WhatsApp y panel de administración."""
 import hmac
 import os
 import re
@@ -63,7 +63,7 @@ if os.environ.get("PRODUCCION") == "1":
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)  # IP real del visitante detrás del hosting
 
 # CAMBIAR AQUÍ
-NEGOCIO = "Monclair Decants y Perfumes"
+NEGOCIO = "Montclair Decants y Perfumes"
 WHATSAPP = os.environ.get("WHATSAPP_NUMERO", "50500000000")
 ADMIN_USUARIO = os.environ.get("ADMIN_USUARIO", "")
 ADMIN_CLAVE = os.environ.get("ADMIN_CLAVE", "")
@@ -151,6 +151,12 @@ def preparar_bd():
                                     ("etiqueta", "TEXT NOT NULL DEFAULT '% OFF'")]:
             if columna not in columnas:
                 conexion.execute(f"ALTER TABLE productos ADD COLUMN {columna} {definicion}")
+        for tamano in TAMANOS:
+            if f"disp_{tamano}" not in columnas:
+                conexion.execute(f"ALTER TABLE productos ADD COLUMN disp_{tamano} INTEGER NOT NULL DEFAULT 1")
+                conexion.execute(f"ALTER TABLE productos ADD COLUMN stock_{tamano} INTEGER NOT NULL DEFAULT 0")
+                if tamano == "frasco":  # las unidades de antes pasan al frasco completo
+                    conexion.execute("UPDATE productos SET stock_frasco = stock")
         columnas = {fila[1] for fila in conexion.execute("PRAGMA table_info(combos)")}
         for columna, definicion in [("oferta", "REAL"), ("descuento", "INTEGER NOT NULL DEFAULT 0"),
                                     ("etiqueta", "TEXT NOT NULL DEFAULT '% OFF'")]:
@@ -205,6 +211,30 @@ def numero(valor):
 def precio_final(producto, tamano):
     """Precio con descuento si lo tiene; si no, el normal."""
     return producto[f"oferta_{tamano}"] or producto[f"precio_{tamano}"]
+
+
+def tamano_vendible(producto, tamano):
+    """Se puede pedir si está marcado disponible, tiene unidades y precio."""
+    return bool(producto[f"disp_{tamano}"]) and producto[f"stock_{tamano}"] > 0 and producto[f"precio_{tamano}"] > 0
+
+
+@app.template_global()
+def primer_tamano(producto):
+    """El tamaño más pequeño que se puede pedir, o None si no hay ninguno."""
+    return next((t for t in TAMANOS if tamano_vendible(producto, t)), None)
+
+
+@app.template_global()
+def estado_tamano(producto, tamano):
+    if not producto[f"disp_{tamano}"] or not producto[f"precio_{tamano}"]:
+        return "No disponible"
+    return "Agotado" if producto[f"stock_{tamano}"] <= 0 else ""
+
+
+def recalcular_stock(producto_id):
+    """stock = total de unidades de los tamaños disponibles (sirve para saber si está agotado)."""
+    suma = " + ".join(f"(CASE WHEN disp_{t} = 1 AND precio_{t} > 0 THEN stock_{t} ELSE 0 END)" for t in TAMANOS)
+    ejecutar(f"UPDATE productos SET stock = {suma} WHERE id = ?", (producto_id,))
 
 
 @app.template_global()
@@ -352,7 +382,7 @@ def pedido(producto_id):
         tamano = request.form.get("tamano", "3")
         if tamano not in TAMANOS:
             abort(400)
-        if producto["stock"] <= 0:
+        if not tamano_vendible(producto, tamano):
             return redirect(url_for("pedido", producto_id=producto_id))
         return agregar_al_carrito({"clave": f"{producto_id}-{tamano}", "nombre": producto["nombre"], "marca": producto["marca"],
                                    "tamano": TAMANOS[tamano], "precio": float(precio_final(producto, tamano))})
@@ -371,8 +401,8 @@ def carrito_disponible():
             fila = consultar("SELECT precio, oferta FROM combos WHERE id = ? AND activo = 1", (int(segundo),), uno=True)
             precio = precio_combo(fila) if fila else None
         elif primero.isdigit() and segundo in TAMANOS:
-            fila = consultar("SELECT * FROM productos WHERE id = ? AND activo = 1 AND stock > 0", (int(primero),), uno=True)
-            precio = precio_final(fila, segundo) if fila else None
+            fila = consultar("SELECT * FROM productos WHERE id = ? AND activo = 1", (int(primero),), uno=True)
+            precio = precio_final(fila, segundo) if fila and tamano_vendible(fila, segundo) else None
         else:
             continue
         if precio is None:
@@ -622,7 +652,7 @@ def admin_sigo():
 def admin_panel():
     barrios, transporte = leer_envios()
     return render_template(
-        "admin_panel.html", productos=consultar("SELECT * FROM productos ORDER BY marca, nombre"), pocas=POCAS_UNIDADES,
+        "admin_panel.html", productos=consultar("SELECT * FROM productos ORDER BY marca, nombre"), pocas=POCAS_UNIDADES, tamanos=TAMANOS,
         combos=consultar("SELECT * FROM combos WHERE tipo = 'listo' ORDER BY precio"),
         paquetes=consultar("SELECT * FROM combos WHERE tipo = 'emprendedor' ORDER BY precio"),
         barrios=barrios, transporte=transporte, transporte_zona=TRANSPORTE, envio_gratis=ENVIO_GRATIS_MAYOR_A)
@@ -707,35 +737,54 @@ def admin_perfume(producto_id=None):
             errores.append("Escribe el nombre y la marca.")
         if valores["genero"] not in GENEROS or valores["categoria"] not in FAMILIAS:
             errores.append("Elige para quién es y la familia olfativa.")
-        valores.update({c: request.form.get(c, "").strip() for c in ("stock", "descuento", "etiqueta", *[f"oferta_{t}" for t in TAMANOS])})
-        precios = [a_numero(valores[f"precio_{t}"]) for t in TAMANOS]
-        if None in precios:
-            errores.append("Escribe los 4 precios normales en dólares (solo números, por ejemplo 7.50).")
-        stock = int(valores["stock"]) if valores["stock"].isdigit() else None
-        if stock is None:
-            errores.append("Escribe las unidades disponibles (0 si está agotado).")
+        valores.update({c: request.form.get(c, "").strip() for c in ("descuento", "etiqueta", *[f"oferta_{t}" for t in TAMANOS],
+                                                                      *[f"stock_{t}" for t in TAMANOS])})
+        disponibles, precios, unidades = [], [], []
+        for tamano, nombre in TAMANOS.items():
+            disponible = 1 if request.form.get(f"disp_{tamano}") else 0
+            valores[f"disp_{tamano}"] = disponible
+            precio = a_numero(valores[f"precio_{tamano}"]) if valores[f"precio_{tamano}"] else None
+            texto = valores[f"stock_{tamano}"]
+            cantidad = int(texto) if texto.isdigit() and int(texto) <= 100_000 else (0 if not texto else None)
+            if disponible and precio is None:
+                errores.append(f"{nombre}: escribe el precio (o desmarca \"Disponible\").")
+            elif not disponible and valores[f"precio_{tamano}"] and precio is None:
+                errores.append(f"{nombre}: el precio no es válido.")
+            if cantidad is None:
+                errores.append(f"{nombre}: las unidades deben ser un número (0 si no hay).")
+            disponibles.append(disponible)
+            precios.append(precio)
+            unidades.append(cantidad or 0)
         ofertas, descuento = descuentos_del_formulario(
-            valores, [(f"oferta_{t}", TAMANOS[t], p) for t, p in zip(TAMANOS, precios)], errores)
+            valores, [(f"oferta_{t}", TAMANOS[t], p) for t, p in zip(TAMANOS, precios) if p], errores)
+        ofertas_por_tamano = iter(ofertas)
+        ofertas = [next(ofertas_por_tamano) if p else None for p in precios]
         etiqueta = valores["etiqueta"] if valores["etiqueta"] in ETIQUETAS_OFERTA else "% OFF"
         valores["imagen"] = foto_del_formulario(actual["imagen"] if actual else FOTO_POR_DEFECTO, errores)
         if not errores:
+            precios = [p or 0 for p in precios]
+            principal = next((p for p, d in zip(precios, disponibles) if d and p), 0)
             fila = (valores["nombre"], valores["marca"], valores["genero"], valores["categoria"], valores["descripcion"][:400],
-                    *precios, precios[0], valores["imagen"], valores["activo"], stock, *ofertas, descuento, etiqueta)
+                    *precios, principal, valores["imagen"], valores["activo"], *ofertas, descuento, etiqueta, *disponibles, *unidades)
             columnas = ("nombre, marca, genero, categoria, descripcion, precio_3, precio_5, precio_10, precio_frasco, precio, "
-                        "imagen, activo, stock, oferta_3, oferta_5, oferta_10, oferta_frasco, descuento, etiqueta")
+                        "imagen, activo, oferta_3, oferta_5, oferta_10, oferta_frasco, descuento, etiqueta, "
+                        "disp_3, disp_5, disp_10, disp_frasco, stock_3, stock_5, stock_10, stock_frasco")
             if actual:
                 asignaciones = ", ".join(f"{c.strip()}=?" for c in columnas.split(","))
                 ejecutar(f"UPDATE productos SET {asignaciones} WHERE id=?", (*fila, producto_id))
             else:
                 producto_id = ejecutar(f"INSERT INTO productos ({columnas}) VALUES ({', '.join('?' * len(fila))})", fila)
-            anterior = actual["stock"] if actual else 0
-            if stock != anterior:
-                registrar_movimiento(producto_id, f"{valores['marca']} {valores['nombre']}", "Entrada" if stock > anterior else "Salida",
-                                     abs(stock - anterior), stock, "Inventario inicial" if not actual else "Ajuste al editar el perfume")
+            recalcular_stock(producto_id)
+            for tamano, cantidad in zip(TAMANOS, unidades):
+                anterior = actual[f"stock_{tamano}"] if actual else 0
+                if cantidad != anterior:
+                    registrar_movimiento(producto_id, f"{valores['marca']} {valores['nombre']} ({TAMANOS[tamano]})",
+                                         "Entrada" if cantidad > anterior else "Salida", abs(cantidad - anterior), cantidad,
+                                         "Inventario inicial" if not actual else "Ajuste al editar el perfume")
             flash("Perfume guardado.")
             return redirect(url_for("admin_panel"))
     return render_template("admin_perfume.html", v=valores, errores=errores, nuevo=actual is None,
-                           generos=GENEROS, familias=FAMILIAS, etiquetas=ETIQUETAS_OFERTA)
+                           generos=GENEROS, familias=FAMILIAS, etiquetas=ETIQUETAS_OFERTA, tamanos=TAMANOS)
 
 
 def descuentos_del_formulario(valores, pares, errores):
@@ -834,23 +883,28 @@ def admin_inventario():
         producto = consultar("SELECT * FROM productos WHERE id = ?", (request.form.get("producto_id", type=int),), uno=True)
         texto = request.form.get("cantidad", "").strip()
         cantidad = int(texto) if texto.isdigit() and 0 < int(texto) <= 10_000 else 0
+        tamano = request.form.get("tamano", "")
         sumar = request.form.get("accion") == "sumar"
-        nombre = f"{producto['marca']} {producto['nombre']}" if producto else ""
-        if not producto or not cantidad:
-            flash("Escribe cuántas unidades (un número mayor que 0).")
+        if not producto or not cantidad or tamano not in TAMANOS:
+            flash("Elige el tamaño y escribe cuántas unidades (un número mayor que 0).")
             return redirect(url_for("admin_inventario"))
+        nombre = f"{producto['marca']} {producto['nombre']} ({TAMANOS[tamano]})"
+        columna = f"stock_{tamano}"  # viene de TAMANOS, nunca del usuario
         if sumar:
-            filas_cambiadas("UPDATE productos SET stock = stock + ? WHERE id = ?", (cantidad, producto["id"]))
-        elif not filas_cambiadas("UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?", (cantidad, producto["id"], cantidad)):
-            flash(f"No puedes quitar {cantidad}: de {nombre} solo hay {producto['stock']}.")
+            filas_cambiadas(f"UPDATE productos SET {columna} = {columna} + ? WHERE id = ?", (cantidad, producto["id"]))
+        elif not filas_cambiadas(f"UPDATE productos SET {columna} = {columna} - ? WHERE id = ? AND {columna} >= ?",
+                                 (cantidad, producto["id"], cantidad)):
+            flash(f"No puedes quitar {cantidad}: de {nombre} solo hay {producto[columna]}.")
             return redirect(url_for("admin_inventario"))
-        quedan = consultar("SELECT stock FROM productos WHERE id = ?", (producto["id"],), uno=True)["stock"]
+        recalcular_stock(producto["id"])
+        quedan = consultar(f"SELECT {columna} FROM productos WHERE id = ?", (producto["id"],), uno=True)[0]
         registrar_movimiento(producto["id"], nombre, "Entrada" if sumar else "Salida", cantidad, quedan,
                              request.form.get("nota", "").strip())
         flash(f"Listo: {nombre} ahora tiene {quedan}.")
         return redirect(url_for("admin_inventario"))
     return render_template("admin_inventario.html", productos=consultar("SELECT * FROM productos ORDER BY marca, nombre"),
-                           movimientos=consultar("SELECT * FROM inventario ORDER BY id DESC LIMIT 100"), pocas=POCAS_UNIDADES)
+                           movimientos=consultar("SELECT * FROM inventario ORDER BY id DESC LIMIT 100"), pocas=POCAS_UNIDADES,
+                           tamanos=TAMANOS)
 
 
 def pedidos_filtrados():

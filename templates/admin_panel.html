@@ -6,8 +6,8 @@
     <div class="admin-item {{ '' if p.activo else 'admin-oculto' }}">
         <img src="{{ url_for('static', filename='img/' ~ p.imagen) }}" alt="">
         <div><strong>{% if p.marca %}{{ p.marca }} · {% endif %}{{ p.nombre }}</strong>{% if not p.activo %} (oculto){% endif %}
-            <p>{% if tabla == 'productos' %}3 ml {{ precio_final(p, '3')|dinero }} · 5 ml {{ precio_final(p, '5')|dinero }} · 10 ml {{ precio_final(p, '10')|dinero }} · Frasco {{ precio_final(p, 'frasco')|dinero }}<br>
-               <span class="admin-stock {{ 'agotado' if p.stock <= 0 else ('pocas' if p.stock <= pocas else '') }}">{{ 'Agotado' if p.stock <= 0 else p.stock ~ ' unidad(es)' }}</span>
+            <p>{% if tabla == 'productos' %}{% for t, etiqueta in tamanos.items() %}{% if not loop.first %} · {% endif %}{{ etiqueta }}: {{ estado_tamano(p, t) or (precio_final(p, t)|dinero ~ ' (' ~ p['stock_' ~ t] ~ ')') }}{% endfor %}<br>
+               <span class="admin-stock {{ 'agotado' if p.stock <= 0 else ('pocas' if p.stock <= pocas else '') }}">{{ 'Agotado' if p.stock <= 0 else p.stock ~ ' unidad(es) en total' }}</span>
                {% if etiqueta_oferta(p) %}<span class="admin-oferta-pill">{{ etiqueta_oferta(p) }}</span>{% endif %}
                {% else %}{{ precio_combo(p)|dinero }}{% if p.oferta %} <s>{{ p.precio|dinero }}</s>{% endif %}{% if p.tipo == 'emprendedor' %} · {{ p.cantidad }} perfumes{% endif %}
                {% if etiqueta_oferta(p) %}<br><span class="admin-oferta-pill">{{ etiqueta_oferta(p) }}</span>{% endif %}{% endif %}</p></div>

@@ -16,16 +16,20 @@
                 {% for f in familias %}<option {{ 'selected' if v.categoria == f }}>{{ f }}</option>{% endfor %}</select></label>
         </div>
         <label class="campo"><span>Descripción</span><textarea name="descripcion" maxlength="400">{{ v.descripcion or '' }}</textarea></label>
-        <div class="admin-cuatro">
-            {% for t, etiqueta in [('3', '3 ml'), ('5', '5 ml'), ('10', '10 ml'), ('frasco', 'Frasco')] %}
-            <label class="campo"><span>{{ etiqueta }}: precio normal ({{ moneda }})</span><input type="text" inputmode="decimal" name="precio_{{ t }}" required
-                placeholder="0.00" value="{{ v['precio_' ~ t]|numero }}"></label>
+        <fieldset class="admin-tamanos">
+            <legend>Tamaños, precios y unidades</legend>
+            <p class="admin-ayuda">Desmarca "Disponible" en los tamaños que todavía no vendes: en la tienda se verán tachados con "No disponible".</p>
+            {% for t, etiqueta in tamanos.items() %}
+            {% set disponible = v['disp_' ~ t] if v['disp_' ~ t] is defined else 1 %}
+            <div class="admin-tamano">
+                <strong>{{ etiqueta }}</strong>
+                <label class="admin-check"><input type="checkbox" name="disp_{{ t }}" value="1" {{ 'checked' if disponible }}> Disponible</label>
+                <label class="campo"><span>Precio ({{ moneda }})</span><input type="text" inputmode="decimal" name="precio_{{ t }}" placeholder="0.00" value="{{ v['precio_' ~ t]|numero if v['precio_' ~ t] else '' }}"></label>
+                <label class="campo"><span>Unidades</span><input type="text" inputmode="numeric" name="stock_{{ t }}" placeholder="0" value="{{ v['stock_' ~ t] if v['stock_' ~ t] is defined else '' }}"></label>
+            </div>
             {% endfor %}
-        </div>
-        <div class="admin-dos">
-            <label class="campo"><span>Unidades disponibles</span><input type="text" inputmode="numeric" name="stock" required placeholder="0"
-                value="{{ v.stock if v.stock is not none else '' }}"><small class="admin-ayuda">Los clientes no ven el número; con 0 aparece "Agotado".</small></label>
-        </div>
+            <small class="admin-ayuda">Los clientes no ven cuántas unidades hay. Con 0 unidades, ese tamaño sale "Agotado".</small>
+        </fieldset>
 
         {% set campos = [('oferta_3', '3 ml: precio con descuento', 'precio_3'), ('oferta_5', '5 ml: precio con descuento', 'precio_5'),
                          ('oferta_10', '10 ml: precio con descuento', 'precio_10'), ('oferta_frasco', 'Frasco: precio con descuento', 'precio_frasco')] %}

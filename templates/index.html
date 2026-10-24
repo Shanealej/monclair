@@ -6,34 +6,31 @@
 
 <!-- Portada -->
 <section class="portada">
-    <div class="contenedor portada-grid">
-        <div class="portada-texto">
-            <p class="sobrelinea">Decant / Fragrance · Managua</p>
-            <h1>Prueba el perfume <em>antes del frasco.</em></h1>
-            <p class="portada-descripcion">El mismo jugo, en 3, 5 o 10 ml. Si ya lo conoces, te llevas el grande.</p>
-            <div class="portada-botones">
-                <a class="boton boton-primario" href="#catalogo">Ver el catálogo {{ icono('flecha') }}</a>
-                {% if combos %}<a class="boton boton-fantasma" href="{{ url_for('ver_combos') }}">O un combo listo</a>{% endif %}
-            </div>
-            <p class="aviso-envio">Los precios no incluyen envío.</p>
-        </div>
-        <div class="portada-visual">
-            <img src="{{ url_for('static', filename='img/monclair_logo.jpeg') }}" alt="Monclair, decants y fragancias">
-        </div>
+    <div class="portada-foto" aria-hidden="true"></div>
+    <div class="contenedor portada-contenido">
+        <p class="portada-ubicacion">
+            <span>{{ icono('ubicacion') }} Punto Managua</span><i></i><span>{{ icono('camion') }} Envíos a todo Nicaragua</span>
+        </p>
+        <h1>Descubre<br>tu fragancia <em>antes de comprar el frasco completo.</em></h1>
+        <p class="portada-descripcion">Prueba perfumes <b>100% originales</b> en presentación de <b>5 ml o 10 ml</b>. Encuentra tu aroma ideal sin gastar de más.</p>
+        <a class="boton boton-primario portada-boton" href="#catalogo">Ver el catálogo {{ icono('flecha-derecha') }}</a>
     </div>
 </section>
 
-<!-- Franja -->
-<section class="franja-datos" aria-label="Datos de la tienda">
-    <div class="contenedor franja-datos-lista">
-        <span>3 · 5 · 10 ml</span><span>Originales</span><span>Pedís por WhatsApp</span><span>Salimos de Managua</span>
+<!-- Ventajas -->
+<section class="ventajas" aria-label="Por qué comprar aquí">
+    <div class="contenedor ventajas-lista">
+        <div>{{ icono('escudo') }}<b>Perfumes 100% originales</b><small>Tienda de confianza</small></div>
+        <div>{{ icono('estrella') }}<b>Gran reputación en Managua</b><small>Clientes satisfechos</small></div>
+        <div>{{ icono('camion') }}<b>Punto Managua</b><small>Envíos a todo Nicaragua</small></div>
+        <div>{{ icono('tarjeta') }}<b>Pedidos por WhatsApp</b><small>Rápido y seguro</small></div>
     </div>
 </section>
 
 <!-- Catálogo -->
 <section id="catalogo" class="seccion contenedor">
     <div class="seccion-cab">
-        <div><p class="sobrelinea">Los más pedidos</p><h2>Catálogo</h2></div>
+        <div><p class="sobrelinea">Nuestros más pedidos</p><h2>Catálogo</h2></div>
         <p class="contador">{{ productos|length }} {{ 'original' if productos|length == 1 else 'originales' }}</p>
     </div>
 
@@ -61,7 +58,8 @@
 
     <div class="productos">
         {% for producto in productos %}
-        {% set agotado = producto.stock <= 0 %}
+        {% set desde = primer_tamano(producto) %}
+        {% set agotado = not desde %}
         <article class="tarjeta {{ 'tarjeta-agotada' if agotado }}">
             <a class="tarjeta-imagen" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Ver {{ producto.nombre }}">
                 <span class="pildora">{{ producto.genero }}</span>
@@ -74,7 +72,8 @@
                 <h3><a href="{{ url_for('pedido', producto_id=producto.id) }}">{{ producto.nombre }}</a></h3>
                 <p class="tarjeta-descripcion">{{ producto.descripcion }}</p>
                 <div class="tarjeta-pie">
-                    <div><small>Desde · 3 ml</small><strong>{{ precio(producto.precio_3, precio_final(producto, '3'), etiqueta_oferta(producto) if producto.stock > 0) }}</strong></div>
+                    {% if desde %}<div><small>Desde · {{ {'3': '3 ml', '5': '5 ml', '10': '10 ml', 'frasco': 'Frasco'}[desde] }}</small><strong>{{ precio(producto['precio_' ~ desde], precio_final(producto, desde), etiqueta_oferta(producto)) }}</strong></div>
+                    {% else %}<div><small>Por ahora</small><strong>Agotado</strong></div>{% endif %}
                     <a class="boton-redondo" href="{{ url_for('pedido', producto_id=producto.id) }}" aria-label="Elegir {{ producto.nombre }}">{{ icono('mas') }}</a>
                 </div>
             </div>
@@ -132,7 +131,7 @@
 <!-- Emprende -->
 <section class="banda">
     <div class="contenedor banda-contenido">
-        <div><p class="sobrelinea">Crece con Monclair</p><h2>Paquetes de frascos completos para emprender.</h2></div>
+        <div><p class="sobrelinea">Crece con Montclair</p><h2>Paquetes de frascos completos para emprender.</h2></div>
         <a class="boton boton-primario" href="{{ url_for('emprende') }}">Ver paquetes {{ icono('flecha') }}</a>
     </div>
 </section>

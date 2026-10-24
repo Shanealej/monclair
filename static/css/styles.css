@@ -1,4 +1,4 @@
-/* Monclair Decants y Perfumes · negro + celeste (verde solo en WhatsApp) */
+/* Montclair Decants y Perfumes · negro + celeste (verde solo en WhatsApp) */
 
 :root {
     --fondo: #05070a;          /* fondo de la página */
@@ -90,19 +90,7 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .cabecera-compacta h1 { margin-bottom: 0; font-size: clamp(32px, 5vw, 44px); }
 .cabecera-compacta p:last-child:not(.sobrelinea) { margin-top: 10px; }
 
-/* ---------- Portada ---------- */
-.portada { position: relative; overflow: hidden; background: radial-gradient(55% 90% at 82% 45%, rgba(67, 199, 244, .2), transparent 62%), radial-gradient(40% 60% at 0% 0%, rgba(67, 199, 244, .08), transparent 70%), var(--fondo); }
-.portada-grid { display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 24px; padding: 44px 0 40px; }
-.portada h1 { max-width: 640px; margin: 4px 0 16px; font-size: clamp(40px, 6.4vw, 70px); font-weight: 780; letter-spacing: -.05em; line-height: 1.02; }
-.portada-descripcion { max-width: 430px; margin-bottom: 24px; color: var(--texto-suave); font-size: 16px; }
-.portada-botones { display: flex; flex-wrap: wrap; gap: 10px; }
-.aviso-envio { margin: 16px 0 0; color: var(--apagado); font-size: 12px; }
-.portada-visual { display: grid; place-items: center; }
-.portada-visual img { width: min(360px, 100%); mix-blend-mode: lighten; }
 
-.franja-datos { border-block: 1px solid var(--linea); background: var(--fondo-alt); }
-.franja-datos-lista { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding: 14px 0; color: var(--apagado); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-.franja-datos-lista span::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 10px; border-radius: 50%; background: var(--acento); vertical-align: middle; }
 
 /* ---------- Catálogo: búsqueda y filtros ---------- */
 .buscador { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 18px; margin-bottom: 14px; border: 1px solid var(--linea); border-radius: 16px; background: var(--superficie); color: var(--apagado); transition: border-color .2s; }
@@ -293,10 +281,6 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
     .barra { min-height: 58px; }
     .chip-carrito { display: none; }
     .seccion { padding-top: 30px; padding-bottom: 30px; }
-    .portada-grid { grid-template-columns: 1fr; padding: 28px 0 24px; }
-    .portada-visual { display: none; }  /* en celular el logo ya está en el encabezado */
-    .portada-botones .boton { flex: 1; }
-    .franja-datos-lista { justify-content: flex-start; font-size: 10px; }
     .buscador .boton { display: none; }
     .segmentos { grid-template-columns: repeat(4, 1fr); }
     .productos { gap: 12px; }
@@ -414,7 +398,7 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .inv-ok b { color: var(--acento); }
 .inv-pocas b, .inv-pocas small { color: #e9c46a; }
 .inv-agotado b, .inv-agotado small { color: var(--error); }
-.inv-acciones { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 8px; }
+.inv-acciones { display: grid; grid-template-columns: 90px 60px 1fr 1fr; gap: 8px; }
 .inv-acciones input, .inv-nota { min-width: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--linea-fuerte); border-radius: 10px; background: var(--fondo); color: var(--texto); font: inherit; text-align: center; }
 .inv-nota { text-align: left; font-size: 13px; }
 .inv-historial summary { cursor: pointer; font-weight: 700; }
@@ -436,3 +420,68 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .combo-imagen .sello { top: auto; right: auto; bottom: 12px; left: 12px; }
 .admin-oferta-pill { background: var(--oferta); color: var(--oferta-tinta); }
 .chip-chat .ico { width: 15px; height: 15px; }
+
+/* ---------- Portada (diseño Montclair) ---------- */
+.portada { position: relative; overflow: hidden; background: var(--fondo); }
+.portada-foto { position: absolute; inset: 0 0 0 auto; width: 58%; background: url("../img/portada_decants.jpg") center 35% / cover no-repeat;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 45%); mask-image: linear-gradient(90deg, transparent 0, #000 45%); opacity: .9; pointer-events: none; }
+.portada-foto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 7, 10, .15) 60%, var(--fondo)); }
+.portada-contenido { position: relative; z-index: 1; padding: 34px 0 44px; }
+.portada-ubicacion { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 26px; font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--texto-suave); }
+.portada-ubicacion span { display: inline-flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--linea-fuerte); }
+.portada-ubicacion .ico { color: var(--acento); width: 22px; height: 22px; }
+.portada-ubicacion i { width: 5px; height: 5px; border-radius: 50%; background: var(--texto-suave); }
+.portada h1 { max-width: 620px; margin: 0 0 18px; font-size: clamp(40px, 6.2vw, 72px); font-weight: 800; letter-spacing: -.045em; line-height: 1.02; }
+.portada h1 em { display: block; margin-top: 6px; color: var(--acento); font-style: normal; font-size: .82em; line-height: 1.05; }
+.portada-descripcion { max-width: 420px; margin-bottom: 26px; color: var(--texto-suave); font-size: 17px; }
+.portada-descripcion b { color: var(--texto); }
+.portada-boton { min-width: 260px; min-height: 56px; font-size: 17px; }
+.portada-boton .ico { width: 22px; height: 22px; }
+
+.ventajas { border-block: 1px solid var(--linea); background: var(--fondo-alt); }
+.ventajas-lista { display: grid; grid-template-columns: repeat(4, 1fr); padding: 22px 0; }
+.ventajas-lista div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 10px; text-align: center; border-left: 1px solid var(--linea); }
+.ventajas-lista div:first-child { border-left: 0; }
+.ventajas-lista .ico { width: 32px; height: 32px; margin-bottom: 6px; color: var(--acento); }
+.ventajas-lista b { font-size: 14px; line-height: 1.3; }
+.ventajas-lista small { color: var(--apagado); font-size: 12px; line-height: 1.35; }
+
+.chip-chat .ico:first-child { width: 18px; height: 18px; }
+
+@media (max-width: 700px) {
+    .portada-foto { width: 64%; opacity: .7; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 50%); mask-image: linear-gradient(90deg, transparent 0, #000 50%); }
+    .portada-contenido { padding: 18px 0 28px; }
+    .portada-ubicacion { flex-wrap: nowrap; gap: 8px; margin-bottom: 22px; font-size: 9px; letter-spacing: .12em; white-space: nowrap; }
+    .portada-ubicacion span { gap: 6px; padding-bottom: 6px; }
+    .portada-ubicacion .ico { width: 15px; height: 15px; }
+    .portada-ubicacion i { width: 4px; height: 4px; flex: none; }
+    .portada h1 { font-size: 42px; margin-bottom: 14px; }
+    .portada h1 em { font-size: .76em; max-width: 92%; }
+    .portada-descripcion { max-width: 64%; font-size: 15px; margin-bottom: 20px; }
+    .portada-boton { min-width: 0; width: 60%; min-height: 50px; font-size: 16px; }
+    .ventajas-lista { padding: 16px 0; }
+    .ventajas-lista div { padding: 0 3px; }
+    .ventajas-lista .ico { width: 26px; height: 26px; margin-bottom: 4px; }
+    .ventajas-lista b { font-size: 11.5px; }
+    .ventajas-lista small { font-size: 10px; }
+}
+@media (max-width: 380px) { .portada h1 { font-size: 38px; } .ventajas-lista { grid-template-columns: repeat(2, 1fr); row-gap: 16px; } .ventajas-lista div:nth-child(3) { border-left: 0; } }
+
+/* Tamaños por perfume */
+.admin-tamanos { display: grid; gap: 10px; margin: 0; padding: 16px; border: 1px solid var(--linea-fuerte); border-radius: 14px; }
+.admin-tamanos legend { padding: 0 6px; font-weight: 700; font-size: 14px; }
+.admin-tamano { display: grid; grid-template-columns: 70px 130px 1fr 1fr; gap: 10px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--linea); }
+.admin-tamano strong { align-self: center; }
+.admin-tamano .admin-check { min-height: 48px; }
+.tamano-no span { opacity: .55; }
+.tamano-aviso { color: var(--apagado); font-size: 11px; font-style: normal; }
+.inv-tamanos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.inv-tamanos .inv-numero { text-align: center; padding: 8px 4px; border: 1px solid var(--linea); border-radius: 10px; }
+.inv-tamanos .inv-numero b { font-size: 24px; }
+.inv-no b, .inv-no small { color: var(--apagado); }
+.inv-acciones select { min-width: 0; min-height: 40px; padding: 6px 8px; border: 1px solid var(--linea-fuerte); border-radius: 10px; background: var(--fondo); color: var(--texto); font: inherit; font-size: 13px; }
+@media (max-width: 640px) {
+    .admin-tamano { grid-template-columns: 1fr 1fr; }
+    .inv-acciones { grid-template-columns: 1fr 1fr; }
+}
+.tamano:not(.tamano-frasco) strong .precio-antes { display: block; }

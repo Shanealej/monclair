@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#05070a">
-    <meta name="description" content="Monclair Decants y Perfumes: decants originales en 3, 5 y 10 ml. Prueba el perfume antes del frasco.">
+    <meta name="description" content="Montclair Decants y Perfumes: perfumes 100% originales en decants. Punto Managua, envíos a todo Nicaragua.">
     <title>{% block titulo %}{{ negocio }}{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
@@ -17,7 +17,7 @@
         <div class="contenedor barra">
             <a class="marca" href="{{ url_for('inicio') }}" aria-label="{{ negocio }}, inicio">
                 <span class="marca-logo"><img src="{{ url_for('static', filename='img/monclair_logo.jpeg') }}" alt=""></span>
-                <span class="marca-texto">MONCLAIR <small>DECANTS Y PERFUMES</small></span>
+                <span class="marca-texto">MONTCLAIR <small>DECANTS Y PERFUMES</small></span>
             </a>
             <nav class="navegacion" aria-label="Navegación principal">
                 <a class="{{ 'activo' if ep == 'inicio' }}" href="{{ url_for('inicio', _anchor='catalogo') }}">Catálogo</a>
@@ -28,7 +28,7 @@
                 <a class="chip-carrito {{ 'activo' if ep == 'ver_carrito' }}" href="{{ url_for('ver_carrito') }}" aria-label="Carrito, {{ cantidad_carrito }} artículos">
                     {{ icono('carrito') }}<span>Carrito</span>{% if cantidad_carrito %}<b>{{ cantidad_carrito }}</b>{% endif %}
                 </a>
-                <a class="chip-chat" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">Chat {{ icono('flecha') }}</a>
+                <a class="chip-chat" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">{{ icono('chat') }}<span>WhatsApp</span>{{ icono('flecha') }}</a>
             </div>
         </div>
     </header>
@@ -47,7 +47,7 @@
 
     <footer class="pie">
         <div class="contenedor pie-interior">
-            <p>MONCLAIR DECANTS Y PERFUMES</p>
+            <p>MONTCLAIR DECANTS Y PERFUMES</p>
             <span>Encuentra una fragancia que hable por ti.</span>
             <small>Managua, Nicaragua</small>
         </div>

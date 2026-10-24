@@ -3,20 +3,24 @@
 {% block contenido %}
 <section class="contenedor admin">
     <h1>Inventario</h1>
-    <p class="nota nota-izq">Aquí ves cuántas unidades te quedan de cada perfume. Cuando llegue mercadería, súmala. Cuando vendas o saques una, réstala.</p>
+    <p class="nota nota-izq">Aquí ves cuántas unidades te quedan de cada tamaño. Cuando llegue mercadería, súmala. Cuando vendas o saques una, réstala.</p>
     {% include "_admin_menu.html" %}
 
     <div class="inv-lista">
     {% for p in productos %}
-        {% set estado = 'agotado' if p.stock <= 0 else ('pocas' if p.stock <= pocas else 'ok') %}
         <form class="inv-tarjeta" method="post">
             <input type="hidden" name="token" value="{{ token }}">
             <input type="hidden" name="producto_id" value="{{ p.id }}">
-            <div class="inv-cab">
-                <div><strong>{{ p.nombre }}</strong><small>{{ p.marca }}</small></div>
-                <div class="inv-numero inv-{{ estado }}"><b>{{ p.stock }}</b><small>{{ 'Agotado' if estado == 'agotado' else ('Quedan pocas' if estado == 'pocas' else 'unidades') }}</small></div>
+            <div class="inv-cab"><div><strong>{{ p.nombre }}</strong><small>{{ p.marca }}</small></div></div>
+            <div class="inv-tamanos">
+                {% for t, etiqueta in tamanos.items() %}
+                {% set n = p['stock_' ~ t] %}
+                {% set estado = 'no' if not p['disp_' ~ t] else ('agotado' if n <= 0 else ('pocas' if n <= pocas else 'ok')) %}
+                <div class="inv-numero inv-{{ estado }}"><small>{{ etiqueta }}</small><b>{{ n }}</b><small>{{ {'no': 'No disponible', 'agotado': 'Agotado', 'pocas': 'Quedan pocas', 'ok': 'unidades'}[estado] }}</small></div>
+                {% endfor %}
             </div>
             <div class="inv-acciones">
+                <select name="tamano" aria-label="Tamaño">{% for t, etiqueta in tamanos.items() %}<option value="{{ t }}" {{ 'selected' if t == '5' }}>{{ etiqueta }}</option>{% endfor %}</select>
                 <input type="text" inputmode="numeric" name="cantidad" value="1" aria-label="Cantidad" required>
                 <button class="boton boton-acento boton-chico" type="submit" name="accion" value="sumar">+ Llegaron</button>
                 <button class="boton boton-fantasma boton-chico" type="submit" name="accion" value="restar">− Se vendieron</button>

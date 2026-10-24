@@ -9,7 +9,8 @@
             <img src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" alt="Perfume {{ producto.nombre }}">
         </div>
         <div class="detalle-info">
-            {% set agotado = producto.stock <= 0 %}
+            {% set elegido = primer_tamano(producto) %}
+            {% set agotado = not elegido %}
             {% if agotado %}<p class="sello sello-agotado sello-detalle">Agotado</p>
             {% elif etiqueta_oferta(producto) %}<p class="sello sello-oferta sello-detalle">{{ etiqueta_oferta(producto) }}</p>{% endif %}
             <div class="etiquetas"><span>{{ producto.genero }}</span><span>Diseñador</span><span>{{ producto.categoria }}</span></div>
@@ -23,9 +24,12 @@
                     <div class="tamanos">
                         {% for valor, nombre in [('3', '3 ml'), ('5', '5 ml'), ('10', '10 ml'), ('frasco', 'Frasco completo')] %}
                         {% set antes = producto['precio_' ~ valor] %}
-                        <label class="tamano {{ 'tamano-frasco' if valor == 'frasco' }}"><input type="radio" name="tamano" value="{{ valor }}" {{ 'checked' if loop.first }} {{ 'disabled' if agotado }}>
-                            <span>{% if valor == 'frasco' %}<em><small>{{ nombre }}</small><i>Precio estimado</i></em>{% else %}<small>{{ nombre }}</small>{% endif %}
-                                <strong>{% if producto['oferta_' ~ valor] %}<s class="precio-antes">{{ antes|dinero }}</s> {% endif %}{{ precio_final(producto, valor)|dinero }}</strong></span></label>
+                        {% set aviso = estado_tamano(producto, valor) %}
+                        <label class="tamano {{ 'tamano-frasco' if valor == 'frasco' }} {{ 'tamano-no' if aviso }}"><input type="radio" name="tamano" value="{{ valor }}" {{ 'checked' if valor == elegido }} {{ 'disabled' if aviso }}>
+                            <span>{% if valor == 'frasco' %}<em><small>{{ nombre }}</small><i>{{ aviso or 'Precio estimado' }}</i></em>{% else %}<small>{{ nombre }}</small>{% endif %}
+                                <strong>{% if aviso %}{% if antes %}<s class="precio-antes">{{ antes|dinero }}</s>{% endif %}
+                                    {% else %}{% if producto['oferta_' ~ valor] %}<s class="precio-antes">{{ antes|dinero }}</s> {% endif %}{{ precio_final(producto, valor)|dinero }}{% endif %}</strong>
+                                {% if aviso and valor != 'frasco' %}<i class="tamano-aviso">{{ aviso }}</i>{% endif %}</span></label>
                         {% endfor %}
                     </div>
                 </fieldset>
