@@ -111,8 +111,8 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .productos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .tarjeta { overflow: hidden; border: 1px solid var(--linea); border-radius: var(--radio); background: var(--superficie); transition: transform .2s, border-color .2s; }
 .tarjeta:hover { transform: translateY(-3px); border-color: var(--linea-fuerte); }
-.tarjeta-imagen { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: #f1f3f5; }
-.tarjeta-imagen img { width: 100%; height: 100%; object-fit: contain; transition: transform .4s; }
+.tarjeta-imagen { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: #0b0f14; }
+.tarjeta-imagen img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }  /* la foto llena el cuadro, sin bordes */
 .tarjeta:hover .tarjeta-imagen img { transform: scale(1.04); }
 .pildora { position: absolute; z-index: 1; top: 12px; left: 12px; padding: 5px 11px; border-radius: 999px; background: rgba(5, 7, 10, .75); backdrop-filter: blur(6px); color: var(--texto); font-size: 11px; font-weight: 700; }
 .tarjeta-info { padding: 16px; }
@@ -130,8 +130,8 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 /* ---------- Combos ---------- */
 .combos-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .combo { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--linea); border-radius: var(--radio); background: var(--superficie); }
-.combo-imagen { position: relative; height: 200px; overflow: hidden; background: #f1f3f5; }
-.combo-imagen img { width: 100%; height: 100%; object-fit: contain; }
+.combo-imagen { position: relative; height: 200px; overflow: hidden; background: #0b0f14; }
+.combo-imagen img { width: 100%; height: 100%; object-fit: cover; }
 .combo-info { display: flex; flex: 1; flex-direction: column; padding: 18px; }
 .combo-info h3 { margin-bottom: 6px; font-size: 24px; font-weight: 750; letter-spacing: -.03em; }
 .combo-info p { color: var(--apagado); font-size: 14px; }
@@ -168,8 +168,8 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .volver { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px; color: var(--apagado); font-size: 13px; }
 .volver:hover { color: var(--acento); }
 .detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-.detalle-foto { overflow: hidden; border: 1px solid var(--linea); border-radius: 20px; background: #f1f3f5; aspect-ratio: 1 / 1; }
-.detalle-foto img { width: 100%; height: 100%; object-fit: contain; }
+.detalle-foto { overflow: hidden; border: 1px solid var(--linea); border-radius: 20px; background: #0b0f14; }
+.detalle-foto img { width: 100%; height: auto; max-height: 80vh; object-fit: cover; }  /* se muestra con su propio formato */
 .etiquetas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
 .etiquetas span { padding: 5px 12px; border-radius: 999px; background: var(--superficie-2); color: var(--texto-suave); font-size: 12px; }
 .detalle-info h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 50px); font-weight: 780; letter-spacing: -.045em; line-height: 1.05; }
@@ -416,7 +416,6 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .paquete { position: relative; }
 .sello-paquete { top: 14px; right: 14px; }
 .paquete-precio .precio-bloque { justify-content: center; }
-.combo-imagen { position: relative; }
 .combo-imagen .sello { top: auto; right: auto; bottom: 12px; left: 12px; }
 .admin-oferta-pill { background: var(--oferta); color: var(--oferta-tinta); }
 .chip-chat .ico { width: 15px; height: 15px; }
@@ -485,3 +484,10 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
     .inv-acciones { grid-template-columns: 1fr 1fr; }
 }
 .tamano:not(.tamano-frasco) strong .precio-antes { display: block; }
+
+/* Sello de clientes en la portada */
+.portada-clientes { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; padding: 10px 16px 10px 12px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 14px; background: rgba(5, 7, 10, .6); backdrop-filter: blur(10px); }
+.portada-clientes .ico { width: 26px; height: 26px; color: var(--oferta); fill: var(--oferta); }
+.portada-clientes b { display: block; font-size: 20px; line-height: 1.1; }
+.portada-clientes small { color: var(--texto-suave); font-size: 12px; }
+@media (min-width: 701px) { .portada-clientes { position: absolute; right: 0; bottom: 44px; margin: 0; } }
