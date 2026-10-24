@@ -25,9 +25,9 @@ Desde el panel puedes:
 - Poner el precio de envío por barrio y el de transporte fuera de Managua.
 - Ver el historial de pedidos y descargarlo en PDF.
 
-## Ojo con Vercel
-Vercel no guarda archivos nuevos: allí los perfumes, fotos y pedidos que subas desde el panel se borran.
-Para usar el panel en internet, publícala en un hosting con disco (por ejemplo PythonAnywhere).
+## Publicar en internet
+Vercel **no sirve** para esta versión: no guarda la base de datos ni las fotos que subes desde el panel.
+Usa **PythonAnywhere**, que sí las guarda. Los pasos están en `PUBLICAR.md`.
 
 ## Seguridad
 Lee `SEGURIDAD.md`. En internet: HTTPS y `PRODUCCION=1` en el `.env`. Nunca `DEBUG=1`.

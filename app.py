@@ -68,7 +68,8 @@ WHATSAPP = os.environ.get("WHATSAPP_NUMERO", "50500000000")
 ADMIN_USUARIO = os.environ.get("ADMIN_USUARIO", "")
 ADMIN_CLAVE = os.environ.get("ADMIN_CLAVE", "")
 CLAVE_MINIMA = 12
-ADMIN_INACTIVIDAD = 2 * 3600   # el panel se cierra tras 2 horas sin uso
+ADMIN_INACTIVIDAD = 30 * 60    # el panel se bloquea tras 30 minutos sin uso
+ADMIN_CIERRE = 30              # segundos para bloquearse después de cerrar la pestaña
 MONEDA = "US$"
 ENVIO_GRATIS_MAYOR_A = 55     # en dólares
 RUTA_BD = CARPETA / "monclair_shane.db"
@@ -134,6 +135,7 @@ def preparar_bd():
                 activo INTEGER NOT NULL DEFAULT 1);
             CREATE TABLE IF NOT EXISTS envios (zona TEXT PRIMARY KEY, precio REAL, transporte INTEGER NOT NULL DEFAULT 0);
             CREATE TABLE IF NOT EXISTS ajustes (clave TEXT PRIMARY KEY, valor TEXT);
+            CREATE TABLE IF NOT EXISTS sesiones_admin (id TEXT PRIMARY KEY, visto REAL NOT NULL, cierre REAL);
             CREATE TABLE IF NOT EXISTS inventario (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT NOT NULL, producto_id INTEGER,
                 producto TEXT NOT NULL, tipo TEXT NOT NULL, cantidad INTEGER NOT NULL,
@@ -502,7 +504,7 @@ def pagina_no_encontrada(_error):
 @app.errorhandler(413)
 def archivo_grande(_error):
     flash("La foto pesa más de 8 MB. Elige una más liviana.")
-    return redirect(url_for("admin_panel") if session.get("admin") else url_for("inicio"))
+    return redirect(url_for("admin_panel") if session.get("admin_sesion") else url_for("inicio"))
 
 
 @app.errorhandler(400)
@@ -522,16 +524,38 @@ def panel_activo():
     return bool(ADMIN_USUARIO) and len(ADMIN_CLAVE) >= CLAVE_MINIMA
 
 
+def sesion_admin_valida():
+    """La sesión vive en el servidor: se puede cerrar desde aquí aunque el navegador guarde la cookie."""
+    sesion_id = session.get("admin_sesion")
+    if not isinstance(sesion_id, str):
+        return None
+    fila = consultar("SELECT * FROM sesiones_admin WHERE id = ?", (sesion_id,), uno=True)
+    ahora = time.time()
+    if not fila or ahora - fila["visto"] > ADMIN_INACTIVIDAD or (fila["cierre"] and ahora > fila["cierre"]):
+        cerrar_sesion_admin()
+        return None
+    return sesion_id
+
+
+def cerrar_sesion_admin():
+    ejecutar("DELETE FROM sesiones_admin WHERE id = ?", (str(session.get("admin_sesion", "")),))
+    for clave in ("admin_sesion", "token"):
+        session.pop(clave, None)
+
+
 def solo_admin(vista):
     """Exige sesión de administrador y, en los POST, el token del formulario."""
     @wraps(vista)
     def envoltura(*args, **kwargs):
         if not panel_activo():
             abort(404)
-        if not session.get("admin") or time.time() - session.get("admin_visto", 0) > ADMIN_INACTIVIDAD:
-            session.pop("admin", None)
+        sesion_id = sesion_admin_valida()
+        if not sesion_id:
             return redirect(url_for("admin_entrar"))
-        session["admin_visto"] = time.time()
+        if request.endpoint == "admin_sigo":  # el aviso automático no cuenta como uso
+            ejecutar("UPDATE sesiones_admin SET cierre = NULL WHERE id = ?", (sesion_id,))
+        else:
+            ejecutar("UPDATE sesiones_admin SET visto = ?, cierre = NULL WHERE id = ?", (time.time(), sesion_id))
         if request.method == "POST" and not hmac.compare_digest(request.form.get("token", ""), session.get("token", "")):
             abort(400)
         return vista(*args, **kwargs)
@@ -542,7 +566,7 @@ def solo_admin(vista):
 def admin_entrar():
     if not panel_activo():
         abort(404)
-    if session.get("admin"):
+    if sesion_admin_valida():
         return redirect(url_for("admin_panel"))
     error = None
     if request.method == "POST":
@@ -559,7 +583,10 @@ def admin_entrar():
             intentos_fallidos.pop(ip, None)
             carrito = session.get("carrito", [])
             session.clear()  # sesión nueva al entrar
-            session.update(admin=True, admin_visto=ahora, token=secrets.token_hex(16), carrito=carrito)
+            sesion_id = secrets.token_urlsafe(32)
+            ejecutar("DELETE FROM sesiones_admin WHERE visto < ?", (ahora - ADMIN_INACTIVIDAD,))
+            ejecutar("INSERT INTO sesiones_admin (id, visto, cierre) VALUES (?, ?, NULL)", (sesion_id, ahora))
+            session.update(admin_sesion=sesion_id, token=secrets.token_hex(16), carrito=carrito)
             return redirect(url_for("admin_panel"))
         else:
             intentos_fallidos.setdefault(ip, []).append(ahora)
@@ -571,9 +598,23 @@ def admin_entrar():
 @app.route("/admin/salir", methods=["POST"])
 @solo_admin
 def admin_salir():
-    for clave in ("admin", "admin_visto", "token"):
-        session.pop(clave, None)
+    cerrar_sesion_admin()
     return redirect(url_for("inicio"))
+
+
+@app.route("/admin/cerrando", methods=["POST"])
+@solo_admin
+def admin_cerrando():
+    """El navegador avisa que se cerró o se fue de la página: si no vuelve en 30 segundos, el panel se bloquea."""
+    ejecutar("UPDATE sesiones_admin SET cierre = ? WHERE id = ?", (time.time() + ADMIN_CIERRE, session["admin_sesion"]))
+    return "", 204
+
+
+@app.route("/admin/sigo", methods=["POST"])
+@solo_admin
+def admin_sigo():
+    """La página del panel sigue abierta (lo manda el navegador cada pocos segundos)."""
+    return "", 204
 
 
 @app.route("/admin/panel")

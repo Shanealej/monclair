@@ -1,3 +1,20 @@
+/* Bloqueo del panel: al cerrar la pestaña o salir de la página se avisa al servidor;
+   si en 30 segundos no vuelve a abrirse una página del panel, queda bloqueado. */
+(function () {
+    var menu = document.querySelector("[data-sesion]");
+    if (!menu) { return; }
+    function aviso(url) {
+        var datos = new FormData();
+        datos.append("token", menu.dataset.token);
+        if (navigator.sendBeacon) { navigator.sendBeacon(url, datos); }
+        else { fetch(url, { method: "POST", body: datos, keepalive: true, credentials: "same-origin" }); }
+    }
+    window.addEventListener("pagehide", function () { aviso(menu.dataset.cerrando); });
+    window.addEventListener("pageshow", function () { aviso(menu.dataset.sigo); });
+    setInterval(function () { if (!document.hidden) { aviso(menu.dataset.sigo); } }, 15000);
+    setTimeout(function () { location.reload(); }, 30 * 60 * 1000 + 5000);  // tras 30 min sin uso muestra el acceso
+})();
+
 /* Panel: vista previa de la foto, arrastrar y soltar, y confirmación al eliminar. */
 document.querySelectorAll("[data-subir-foto]").forEach(function (zona) {
     var input = zona.querySelector("input[type=file]");
