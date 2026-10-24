@@ -49,7 +49,7 @@ button, input, select { font: inherit; }
 .chip-carrito { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--linea-fuerte); border-radius: 999px; font-size: 13px; transition: .2s; }
 .chip-carrito:hover, .chip-carrito.activo { border-color: var(--acento); color: var(--acento); }
 .chip-carrito b, .nav-icono b { display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--acento); color: var(--acento-tinta); font-size: 11px; }
-.chip-chat { padding: 9px 15px; border-radius: 999px; background: var(--whatsapp); color: var(--whatsapp-tinta); font-size: 13px; font-weight: 700; transition: .2s; }
+.chip-chat { display: inline-flex; align-items: center; gap: 5px; padding: 9px 15px; border-radius: 999px; background: var(--whatsapp); color: var(--whatsapp-tinta); font-size: 13px; font-weight: 700; transition: .2s; }
 .chip-chat:hover { filter: brightness(.92); }
 
 /* ---------- Botones ---------- */
@@ -435,3 +435,4 @@ h1 em, h2 em { color: var(--acento); font-style: normal; }
 .combo-imagen { position: relative; }
 .combo-imagen .sello { top: auto; right: auto; bottom: 12px; left: 12px; }
 .admin-oferta-pill { background: var(--oferta); color: var(--oferta-tinta); }
+.chip-chat .ico { width: 15px; height: 15px; }

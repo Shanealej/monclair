@@ -28,7 +28,7 @@
                 <a class="chip-carrito {{ 'activo' if ep == 'ver_carrito' }}" href="{{ url_for('ver_carrito') }}" aria-label="Carrito, {{ cantidad_carrito }} artículos">
                     {{ icono('carrito') }}<span>Carrito</span>{% if cantidad_carrito %}<b>{{ cantidad_carrito }}</b>{% endif %}
                 </a>
-                <a class="chip-chat" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">Chat ↗</a>
+                <a class="chip-chat" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">Chat {{ icono('flecha') }}</a>
             </div>
         </div>
     </header>
